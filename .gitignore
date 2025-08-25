@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pycache/
+*.pkl
+*.env
+*.venv
+*.egg-info/
+*.egg
+
+# Virtual environments
+env/
+venv/
+venf/
+ENV/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDEs
+.idea/
+.idea
+.idea/*
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# MyPy cache
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Pytest
+.pytest_cache/
+
+# Database / SQLite
+*.db
+*.sqlite3
+
+# FastAPI / Uvicorn
+*.pid
+
+
+# Alembic
+migrations/__pycache__
+migrations/versions/*
+
+
+FILES/
