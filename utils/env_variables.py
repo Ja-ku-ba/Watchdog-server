@@ -6,7 +6,10 @@ load_dotenv()
 db_user = os.getenv('DB_USER')
 db_password = os.getenv('DB_PASSWORD')
 db_name = os.getenv('DB_NAME')
-DATABASE_URL = f"postgresql+asyncpg://{db_user}:{db_password}@localhost:5432/{db_name}"
+db_url = os.getenv('DB_URL')
+db_port = os.getenv('DB_PORT')
+DATABASE_URL = f"postgresql+asyncpg://{db_user}:{db_password}@{db_url}:{db_port}/{db_name}"
+
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
