@@ -71,4 +71,6 @@ migrations/__pycache__
 migrations/versions/*
 
 
+# Own caltalogs
 FILES/
+tests/

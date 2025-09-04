@@ -48,29 +48,7 @@ class UserService:
         }
 
     async def login(self, user_schema):
-        existing_user = await User.get_user_by_email_or_username(
-            session=self.session, email=user_schema.email
-            )
-        
-        raise_exception = False
-
-
-        if existing_user is not None:
-            if existing_user.email != user_schema.email:
-                raise_exception = True
-        if existing_user is None:
-            raise_exception = True
-
-        if not raise_exception:
-            password_valid = AuthBackend().verify_password(user_schema.password, existing_user.password)
-            if not password_valid:
-                raise_exception = True
-
-        if raise_exception:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Nieprawidłowe hasło lub adres email"
-            )
+        existing_user = self.verify_user_cridentials(user_schema.email, user_schema.password)
 
         access_token = AuthBackend().create_access_token(existing_user.email)
         refresh_token = AuthBackend().create_refresh_token(existing_user.email)
@@ -87,3 +65,30 @@ class UserService:
 
     async def refresh_acces_token(self, token: UserToken):
         return await AuthBackend().refresh_acces_token(self.session, token.refresh_token)
+    
+    async def verify_user_cridentials(self, email, password):
+        existing_user = await User.get_user_by_email_or_username(
+            session=self.session, email=email
+            )
+        
+        raise_exception = False
+
+
+        if existing_user is not None:
+            if existing_user.email != email:
+                raise_exception = True
+        if existing_user is None:
+            raise_exception = True
+
+        if not raise_exception:
+            password_valid = AuthBackend().verify_password(password, existing_user.password)
+            if not password_valid:
+                raise_exception = True
+
+        if raise_exception:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Nieprawidłowe hasło lub adres email"
+            )
+        
+        return existing_user

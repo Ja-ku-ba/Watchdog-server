@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, Numeric, DateTime, ForeignKey, select, or_
+from sqlalchemy import Column, Integer, String, Boolean, Numeric, DateTime, ForeignKey, select
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy_utils import ChoiceType
-from uuid import uuid4
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from db.connector import Base
-from constants.models.video import VIDEO_TYPES, VIDEO_TYPE_INTRUDER
 
 
 class Camera(Base):
@@ -16,7 +14,6 @@ class Camera(Base):
     software_version = Column(Numeric, default=0)
     active = Column(Boolean, default=True)
     
-    # relacja do connectora
     camera_groups = relationship("CameraGroupConnector", back_populates="camera")
     videos = relationship("Video", back_populates="camera")
 
@@ -28,6 +25,17 @@ class CameraGroupConnector(Base):
     camera_id = Column(Integer, ForeignKey("cameras.id"))
     group_id = Column(Integer, ForeignKey("groups.id"))
     
-    # relacje do encji
     camera = relationship("Camera", back_populates="camera_groups")
     group = relationship("Group", back_populates="camera_groups")
+
+
+    ############################################
+    # works like serchable property in django
+    @hybrid_property
+    def camera_device_name(self):
+        return self.camera.device_name if self.camera else None
+
+    @camera_device_name.expression
+    def camera_device_name(cls):
+        return select(Camera.device_name).where(Camera.id == cls.camera_id).scalar_subquery() 
+    ############################################

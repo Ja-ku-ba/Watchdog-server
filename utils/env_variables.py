@@ -10,7 +10,6 @@ db_url = os.getenv('DB_URL')
 db_port = os.getenv('DB_PORT')
 DATABASE_URL = f"postgresql+asyncpg://{db_user}:{db_password}@{db_url}:{db_port}/{db_name}"
 
-
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')

@@ -4,6 +4,7 @@ aiosqlite==0.21.0
 alembic==1.16.4
 annotated-types==0.7.0
 anyio==4.9.0
+asgiref==3.9.1
 async-timeout==5.0.1
 asyncpg==0.30.0
 babel==2.17.0
@@ -14,6 +15,7 @@ click==8.2.1
 cryptography==45.0.5
 dnspython==2.7.0
 email_validator==2.2.0
+fastadmin==0.2.22
 fastapi==0.116.1
 fastapi-cli==0.0.8
 fastapi-cloud-cli==0.1.4
