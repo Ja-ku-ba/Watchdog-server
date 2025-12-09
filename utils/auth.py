@@ -1,8 +1,8 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends, HTTPException, status
+from sqlalchemy import update
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from typing import Union, Any
 from passlib.context import CryptContext
@@ -10,7 +10,8 @@ from passlib.context import CryptContext
 from db.connector import get_session
 from utils.env_variables import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
 from models.user import User
-from schemas.user import UserDataFromToken
+from models.device import Camera
+from schemas.user import UserDataFromToken, UserNotificationToken
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -72,6 +73,41 @@ class AuthBackend:
         return {
             'access_token': self.create_access_token(user.email),
         }
+    
+    async def assign_notification_token(self, session: AsyncSession, notification_token:UserNotificationToken, user:User) -> bool:
+        try:
+            stmt = (
+                update(User)
+                .where(User.id == user.id)
+                .values(notification_token=notification_token.notification_token)
+            )
+            await session.execute(stmt)
+            await session.commit()
+            return True
+        except Exception as e:
+            await session.rollback()
+            print('---------------', str(e))
+            return False
+
+    async def delete_notification_token(self, session: AsyncSession, user:User) -> bool:
+        try:
+            db_user = await session.get(User, user.id)
+            if not db_user or not db_user.notification_token:
+                return False 
+            notification_token = db_user.notification_token
+
+            stmt = (
+                update(User)
+                .where(User.id == db_user.id)
+                .values(notification_token=None, old_notification_token=notification_token)
+            )
+            await session.execute(stmt)
+            await session.commit()
+            return True
+        except Exception as e:
+            await session.rollback()
+            print('---------------', str(e))
+            return False
 
     async def get_current_user(self, session: AsyncSession = Depends(get_session), token: str = Depends(oauth2_scheme)) -> User:
         credentials_exception = HTTPException(
@@ -102,17 +138,37 @@ class AuthBackend:
         user = await User.get_user_by_email_or_username(session, email=token_data.email)
         if user is None:
             raise credentials_exception
-        print(f"User id: {user.id}")
         return User(
             id=user.id,
             username=user.username,
             email=user.email,
-            active=user.active,
+            # active=user.active,
             # scopes=user.scopes
         )
 
-    async def get_current_active_user(self, current_user: Annotated[User, Depends(get_current_user)]):
-        if current_user.disabled:
-            raise HTTPException(status_code=400, detail="Inactive user")
-        return current_user
+    # async def get_current_active_user(self, current_user: Annotated[User, Depends(get_current_user)]):
+    #     if current_user.disabled:
+    #         raise HTTPException(status_code=400, detail="Inactive user")
+    #     return current_user
 
+    async def get_current_device(self, uid: str = Header(..., alias="X-Device-UID"), session: AsyncSession = Depends(get_session)) -> Camera:
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "UID"},
+        )
+        
+        camera = await Camera.get_device_by_uidd(session, uid=uid)
+        if camera is None:
+            raise credentials_exception
+        return Camera(
+            camera_uid=camera.camera_uid,
+            id=camera.id
+        )
+        # return Camera(
+            # id=user.id,
+            # username=user.username,
+            # email=user.email,
+            # active=user.active,
+            # scopes=user.scopes
+        # )

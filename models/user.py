@@ -7,33 +7,29 @@ from uuid import uuid4
 from db.connector import Base
 
 
-class UserGroupConnector(Base):
-    __tablename__ = "user_group_connectors"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
-    
-    # relacje dwustronne
-    user = relationship("User", back_populates="user_group_connectors")
-    group = relationship("Group", back_populates="user_group_connectors")
-
-
 class User(Base):
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True)
-    token = Column(String, unique=True)
     email = Column(String, unique=True)
+    username = Column(String, unique=True)
     password = Column(String)
+
     active = Column(Boolean, default=True)
     super_user = Column(Boolean, default=False)
+
     activated_at = Column(DateTime)
+
+    token = Column(String, unique=True)
+
+    notification_token = Column(String, unique=True)
+    old_notification_token = Column(String, unique=True)
     
+
     user_group_connectors = relationship("UserGroupConnector", back_populates="user")
-    groups = relationship("Group", secondary="user_group_connectors", viewonly=True)
-    
+    faces_from_user = relationship("FacesFromUser", back_populates="user")
+    user_notifications = relationship("UserNotifications", back_populates="user")
+
     @classmethod
     async def get_user_by_email_or_username(cls, session: AsyncSession, email: str|None=None, username: str|None=None):
         conditions = []
@@ -69,12 +65,34 @@ class User(Base):
 
 class Group(Base):
     __tablename__ = "groups"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    
+
     user_group_connectors = relationship("UserGroupConnector", back_populates="group")
-    users = relationship("User", secondary="user_group_connectors", viewonly=True)
+    cameras_group_connector = relationship("CameraGroupConnector", back_populates="group")
+
+
+class UserGroupConnector(Base):
+    __tablename__ = "user_group_connectors"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user = relationship("User", back_populates="user_group_connectors")
+
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    group = relationship("Group", back_populates="user_group_connectors")
+
+
+class UserNotifications(Base):
+    __tablename__ = "user_notifications"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
     
-    camera_groups = relationship("CameraGroupConnector", back_populates="group")
-    cameras = relationship("Camera", secondary="camera_group_connectors", viewonly=True)
+    notification_new_video = Column(Boolean, default=False)
+    notification_intruder = Column(Boolean, default=False)
+    notification_friend = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="user_notifications")

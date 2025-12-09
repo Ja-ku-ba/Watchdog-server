@@ -5,7 +5,8 @@ from alembic import context
 from db.connector import Base
 from models.device import Camera, CameraGroupConnector
 from models.video import Video
-from models.user import User, Group, UserGroupConnector 
+from models.user import User, Group, UserGroupConnector, UserNotifications
+from models.analyze import FilesAnalyze, FacesFromUser
 
 from utils.env_variables import DATABASE_URL as database_url
 

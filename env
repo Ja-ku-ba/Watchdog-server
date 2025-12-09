@@ -9,6 +9,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 REFRESH_TOKEN_EXPIRE_MINUTES = 4320
 
+UPLOAD_DIR = "/home/kuba/Desktop/watchdog_server/storages"
+UPLOAD_DIR_UNKNOWN = '/to_analyze'
+UPLOAD_DIR_KNOWN = '/known_users'
 
 # # admin variables
 # ADMIN_USER_MODEL="User"

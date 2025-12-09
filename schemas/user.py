@@ -22,9 +22,9 @@ class UserCreate(BaseUser):
         return str(v).strip()
 
 
-class UserWithJwtToken(BaseUser):
-    access_token: str | None
-    refresh_token: str
+# class UserWithJwtToken(BaseUser):
+#     access_token: str | None
+#     refresh_token: str
 
 
 class UserToken(BaseModel):
@@ -38,6 +38,11 @@ class UserRefreshToken(BaseModel):
 
 class UserAccessToken(BaseModel):
     access_token: str | None
+
+
+class UserNotificationToken(BaseModel):
+    notification_token: str
+
 
 
 class UserAuthenticate(BaseModel):
@@ -56,3 +61,20 @@ class UserAuthenticate(BaseModel):
 class UserDataFromToken(BaseModel):
     email: str = None
     scopes: list[str] = []
+
+
+class UserNotificationSettings(BaseModel):
+    notification_new_video: bool
+    notification_intruder: bool
+    notification_friend: bool
+
+
+
+class VerifiedUsers(BaseModel):
+    name: str
+    files_counter: int
+    image_hashes: list[str] = []
+
+
+class AddVerifiedUser(BaseModel):
+    name: str

@@ -74,3 +74,4 @@ migrations/versions/*
 # Own caltalogs
 FILES/
 tests/
+storages/

@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base
 
 from utils.env_variables import DATABASE_URL
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -22,10 +22,6 @@ async def get_session() -> AsyncSession:
 
 
 async def run_migrations_once():
-    """
-    Uruchom migracje tylko jeśli są nowe do zastosowania.
-    Nie tworzy nowych plików migracji, aby uniknąć restartów serwera w trybie --reload.
-    """
     try:
         db_url = DATABASE_URL
         if db_url.startswith("postgresql+asyncpg://"):
