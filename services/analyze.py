@@ -10,9 +10,8 @@ from sqlalchemy import select
 from models.analyze import FilesAnalyze, FacesFromUser
 from models.device import Camera, CameraGroupConnector
 from models.user import User, Group, UserGroupConnector
+from utils.env_variables import UPLOAD_DIR
 
-
-UPLOAD_DIR = "/home/kuba/Desktop/watchdog_server/storages"
 UPLOAD_DIR_UNKNOWN = UPLOAD_DIR + '/to_analyze'
 UPLOAD_DIR_KNOWN = UPLOAD_DIR + '/known_users'
 
