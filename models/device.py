@@ -8,7 +8,7 @@ from db.connector import Base
 
 class Camera(Base):
     __tablename__ = "cameras"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     device_name = Column(String, unique=True)
     activated_at = Column(DateTime)

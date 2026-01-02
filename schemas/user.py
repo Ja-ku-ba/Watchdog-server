@@ -1,13 +1,17 @@
 from pydantic import BaseModel, EmailStr, validator
 
 
-class BaseUser(BaseModel):
+class BaseUniqueUser(BaseModel):
     email: EmailStr
-    username: str
 
     @validator('email', pre=True)
     def clean_email(cls, v):
         return str(v).strip().lower()
+
+
+class BaseUser(BaseUniqueUser):
+    username: str
+
     
     @validator('username', pre=True)  
     def clean_username(cls, v):
@@ -20,11 +24,6 @@ class UserCreate(BaseUser):
     @validator('password', pre=True)
     def clean_password(cls, v):
         return str(v).strip()
-
-
-# class UserWithJwtToken(BaseUser):
-#     access_token: str | None
-#     refresh_token: str
 
 
 class UserToken(BaseModel):
@@ -72,9 +71,18 @@ class UserNotificationSettings(BaseModel):
 
 class VerifiedUsers(BaseModel):
     name: str
+    hash: str
     files_counter: int
     image_hashes: list[str] = []
 
 
 class AddVerifiedUser(BaseModel):
     name: str
+
+
+class UserGroups(BaseModel):
+    name: str
+    users: list[str] = []
+
+    # class Meta:
+    #     from_attributes = True

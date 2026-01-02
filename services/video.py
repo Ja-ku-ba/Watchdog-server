@@ -11,11 +11,6 @@ from models.user import User, Group, UserGroupConnector
 from models.video import Video
 
 
-class VideoStramingService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-
 class VideoService:
     def __init__(self, session: AsyncSession, current_user: User|None = None, current_camera: Camera|None = None):
         self._session = session

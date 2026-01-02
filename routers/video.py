@@ -9,7 +9,7 @@ from db.connector import get_session
 from utils.auth import AuthBackend
 from models.user import User
 from models.device import Camera
-from services.video import VideoService, VideoStramingService
+from services.video import VideoService
 
 
 router = APIRouter(

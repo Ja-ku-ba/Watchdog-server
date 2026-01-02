@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi import FastAPI
 
-from routers import user, video, analyze
+from routers import user, video, analyze, device
 
 
 app = FastAPI()
@@ -19,7 +19,7 @@ async def on_startup():
 app.include_router(user.router)
 app.include_router(video.router)
 app.include_router(analyze.router)
-
+app.include_router(device.router)
 
 from dotenv import load_dotenv
 load_dotenv()

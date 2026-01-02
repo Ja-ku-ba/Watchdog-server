@@ -9,13 +9,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 REFRESH_TOKEN_EXPIRE_MINUTES = 4320
 
-UPLOAD_DIR = "/home/kuba/Desktop/watchdog_server/storages"
+UPLOAD_DIR = "/var/www/watchdog_server/storages"
 UPLOAD_DIR_UNKNOWN = '/to_analyze'
 UPLOAD_DIR_KNOWN = '/known_users'
 
-# # admin variables
-# ADMIN_USER_MODEL="User"
-# ADMIN_USER_MODEL_USERNAME_FIELD="email"
-# ADMIN_SECRET_KEY=SECRET_KEY
-# ADMIN_SITE_NAME="Watchdog"
-# ADMIN_PRIMARY_COLOR="#1b1b1b"
+FIREBASE_CERTIFICATE_PATH = "/path_to_uour_firebase_certificate.json"
+
