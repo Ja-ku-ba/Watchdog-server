@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
+from constants.models.video import VIDEO_TYPE_FRIEND, VIDEO_TYPE_INTRUDER, VIDEO_TYPE_UNKNOWN
 from db.connector import Base
 
 
@@ -61,6 +62,16 @@ class User(Base):
             if not existing_user:
                 self.token = new_token
                 break
+
+    async def get_allowed_notification_types(self):
+        allowed_notifications = set()
+        if self.user_notifications.notification_new_video:
+            allowed_notifications.add(VIDEO_TYPE_UNKNOWN)
+        if self.user_notifications.notification_intruder:
+            allowed_notifications.add(VIDEO_TYPE_INTRUDER)
+        if self.user_notifications.notification_friend:
+            allowed_notifications.add(VIDEO_TYPE_FRIEND)
+        return allowed_notifications
 
 
 class Group(Base):

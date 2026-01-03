@@ -1,6 +1,9 @@
 import traceback, face_recognition, os, multiprocessing, time
 from typing import List, Tuple
 
+from models.device import CameraGroupConnector
+from models.video import Video
+from models.user import Group, User, UserGroupConnector
 from models.analyze import FilesAnalyze, FacesFromUser
 from db.connector_sync import SessionSync 
 from services.notifier import NotifierService 
@@ -29,7 +32,6 @@ class Analyzer:
                 
                 print(f"Znaleziono {len(task_ids)} twarzy do anlizy")
                 
-                # Procesy równolegle
                 processes = []
                 for task_id in task_ids:
                     p = multiprocessing.Process(target=self._process_task, args=(task_id,))
@@ -54,11 +56,15 @@ class Analyzer:
 
         faces_query = (
             session.query(FacesFromUser)
-            .join(FacesFromUser.faces_from_user_camera_connector)
+            .join(FacesFromUser.user)
+            .join(User.user_group_connectors)
+            .join(UserGroupConnector.group)
+            .join(Group.cameras_group_connector)
             .filter(
-                FacesFromUser.faces_from_user_camera_connector.any(camera_id=camera_id),
+                CameraGroupConnector.camera_id == camera_id,
                 FacesFromUser.deleted == False
             )
+            .distinct()
             .all()
         )
 
@@ -120,13 +126,13 @@ class Analyzer:
                 print("---------------------------------")
                 print("             INTRUZ              ")
                 print(f"    {task.file_path}")
-                self._send_notification(task, get_message_by_type(VIDEO_TYPE_INTRUDER))
+                self._send_notification(task, VIDEO_TYPE_INTRUDER)
             elif match_result is True:
                 task.reported = True
                 print("---------------------------------")
                 print("          PRZYJACIEL             ")
                 print(f"    {task.file_path}")
-                self._send_notification(task, get_message_by_type(VIDEO_TYPE_FRIEND))
+                self._send_notification(task, VIDEO_TYPE_FRIEND)
             else:
                 task.reported = False
                 print("Brak rozpoznania")
@@ -184,7 +190,6 @@ class Analyzer:
                     print(f"    Pewność: {match_info['confidence']:.2%}")
 
                     return True
-                    # return match_info
             
             print("Nei rozpoznano żadnej znanej osoby")
             return False
@@ -194,18 +199,18 @@ class Analyzer:
             return None
 
     @staticmethod
-    def _send_notification(task, message):
+    def _send_notification(task, message_type):
         notification_tokens = set()
         for camera_group in task.camera.camera_groups:
             group = camera_group.group
             
             for user_group in group.user_group_connectors:
                 user = user_group.user
-                
-                if user.notification_token:
+                if user.notification_token and message_type in user.get_allowed_notification_types:
                     notification_tokens.add(user.notification_token)
 
         if len(notification_tokens):
+            message = get_message_by_type(message_type)
             NotifierService().send_multicast(list(notification_tokens), "Powiadomienie o detekcji", message)
 
 Analyzer().worker_job(batch_size=1, sleep_time=10)
