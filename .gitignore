@@ -17,6 +17,7 @@ venv/
 venf/
 ENV/
 .venv/
+config/
 
 # Distribution / packaging
 build/
