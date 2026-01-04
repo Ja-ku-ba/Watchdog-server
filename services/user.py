@@ -6,8 +6,8 @@ from typing import List
 from fastapi import HTTPException, status, UploadFile
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case, update, exists
-from sqlalchemy.orm import selectinload, or_
+from sqlalchemy import select, func, case, update, or_
+from sqlalchemy.orm import selectinload
 
 from models.analyze import FacesFromUser
 from models.user import User, UserNotifications, Group, UserGroupConnector
