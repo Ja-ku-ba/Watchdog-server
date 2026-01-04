@@ -7,7 +7,7 @@ from fastapi import HTTPException, status, UploadFile
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, case, update, exists
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, or_
 
 from models.analyze import FacesFromUser
 from models.user import User, UserNotifications, Group, UserGroupConnector
@@ -141,25 +141,30 @@ class UserService:
         return notifications
 
     async def get_verified_users(self, current_user: User):
-        subq = (
-            select(1)
+        users_in_same_groups = (
+            select(UserGroupConnector.user_id)
             .where(
-                UserGroupConnector.user_id == FacesFromUser.user_id,
                 UserGroupConnector.group_id.in_(
                     select(UserGroupConnector.group_id)
                     .where(UserGroupConnector.user_id == current_user.id)
-                ),
+                )
             )
+            .distinct()
         )
 
         stmt = (
             select(
                 FacesFromUser.name.label("name"),
                 FacesFromUser.name_hash.label("hash"),
-                func.array_agg(FacesFromUser.hash).label("image_hashes"),
-                func.count(FacesFromUser.id).label("files_counter"),
+                func.array_agg(func.distinct(FacesFromUser.hash)).label("image_hashes"),
+                func.count(func.distinct(FacesFromUser.id)).label("files_counter"),
             )
-            .where(exists(subq))
+            .where(
+                or_(
+                    FacesFromUser.user_id == current_user.id,
+                    FacesFromUser.user_id.in_(users_in_same_groups)
+                )
+            )
             .group_by(
                 FacesFromUser.name,
                 FacesFromUser.name_hash,
