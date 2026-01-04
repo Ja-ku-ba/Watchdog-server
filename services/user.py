@@ -343,16 +343,21 @@ class UserService:
         await self.session.commit()
 
     async def __get_verified_user_photo_by_ucer_hash(self, current_user, hash):
+        users_in_same_groups = (
+            select(UserGroupConnector.user_id)
+            .where(
+                UserGroupConnector.group_id.in_(
+                    select(UserGroupConnector.group_id)
+                    .where(UserGroupConnector.user_id == current_user.id)
+                )
+            )
+        )
+
         query = select(FacesFromUser).where(
             FacesFromUser.hash == hash,
-            FacesFromUser.user_id.in_(
-                select(UserGroupConnector.user_id).where(
-                    UserGroupConnector.group_id.in_(
-                        select(UserGroupConnector.group_id).where(
-                            UserGroupConnector.user_id == current_user.id
-                        )
-                    )
-                )
+            or_(
+                FacesFromUser.user_id == current_user.id,
+                FacesFromUser.user_id.in_(users_in_same_groups)
             )
         )
     
