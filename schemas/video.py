@@ -1,6 +1,7 @@
 from typing import List
-from datetime import datetime
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel
+
+from schemas.device import Device
 
 
 class Video(BaseModel):
@@ -13,11 +14,11 @@ class Video(BaseModel):
     url: str
 
 
-class VideoList(RootModel[List[Video]]):
-    pass
+class VideoList(BaseModel):
+    configured_devices: List[Device]
+    videos: List[Video]
 
 
-# ,camera: Camera, file_path: str, recorded_at: datetime, record_length: float
 class VideoSchema(BaseModel):
     file_path: str
     recorded_at: str

@@ -18,22 +18,9 @@ router = APIRouter(
 )
 
 
-@router.get("/get-videos-hashes", response_model=List[str])
-async def get_videos_list(offset: int = 0, limit: int = 15, session: AsyncSession = Depends(get_session), current_user: User = Depends(AuthBackend().get_current_user)):
-    return await VideoService(session, current_user).get_video_hashes_for_user(offset, limit)
-
-
 @router.get("/get-videos", response_model=VideoList)
 async def get_videos_list(session: AsyncSession = Depends(get_session), current_user: User = Depends(AuthBackend().get_current_user)):
     return await VideoService(session, current_user).get_videos_for_user()
-
-
-@router.get("/thumbnail/{file_hash}", response_model=VideoList)
-async def get_thumbnail(file_hash: str, session: AsyncSession = Depends(get_session), current_user: User = Depends(AuthBackend().get_current_user)):
-    file_path = await VideoService(session, current_user).get_video_path_for_user(file_hash)
-    if not file_path or not os.path.exists(file_path.get('thumbnail')):
-        raise HTTPException(status_code=404, detail="Video not found")
-    return FileResponse(path=file_path.get('thumbnail'), filename="thumbnail.png", media_type="image/png")
 
 
 @router.post("/save-info-about-video")
