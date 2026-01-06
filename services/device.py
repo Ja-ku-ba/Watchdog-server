@@ -1,13 +1,8 @@
+from typing import Set
 import datetime
-from dateutil import parser
 
 from sqlalchemy import select, insert
-from sqlalchemy.orm import selectinload
-from typing import Set
-from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
-from sqlalchemy.orm import selectinload, joinedload
 
 from models.user import User
 from schemas.user import BaseUniqueUser
@@ -23,29 +18,28 @@ class DeviceService:
 
     async def register_device(self, request_user: BaseUniqueUser) -> bool:
         try:
+            print('-------------------------------')
             user = await User.get_user_by_email_or_username(
                 session=self._session, 
                 email=request_user.email
             )
-
+            print(user)
             if not user:
                 return False
             
             related_users = await self._get_related_users(user.id)
             existing_group = await self._get_camera_group(self._camera.id)
-            
             if existing_group:
                 target_group = existing_group
             else:
-                if not group_name:
-                    group_name = f"Kamera {self._camera.device_name}"
-                
+                group_name = f"Kamera: {datetime.datetime.now().strftime('%d.%m.%Y')}"
+                # if not group_name:
+                    # group_name = f"Kamera {self._camera.device_name}"
                 target_group = await self._create_group(group_name)
                 if not target_group:
                     return False
-                
+                print(target_group)
                 await self._create_camera_group_connector(self._camera.id, target_group.id)
-            
             await self._add_users_to_group_if_not_exists(target_group.id, related_users)
             await self._propagate_all_cameras_between_users(related_users)
             await self._session.commit()
