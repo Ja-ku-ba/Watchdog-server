@@ -28,21 +28,29 @@ class DeviceService:
                 return False
             
             related_users = await self._get_related_users(user.id)
+            print(related_users)
             existing_group = await self._get_camera_group(self._camera.id)
+            print(existing_group)
             if existing_group:
                 target_group = existing_group
             else:
                 group_name = f"Kamera: {datetime.datetime.now().strftime('%d.%m.%Y')}"
+                print(group_name)
                 # if not group_name:
                     # group_name = f"Kamera {self._camera.device_name}"
                 target_group = await self._create_group(group_name)
+                print(target_group)
                 if not target_group:
                     return False
                 print(target_group)
                 await self._create_camera_group_connector(self._camera.id, target_group.id)
+            print(111)
             await self._add_users_to_group_if_not_exists(target_group.id, related_users)
+            print(222)
             await self._propagate_all_cameras_between_users(related_users)
+            print(333)
             await self._session.commit()
+            print(444)
             return True
             
         except Exception as e:
