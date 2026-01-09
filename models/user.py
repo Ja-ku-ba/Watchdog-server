@@ -29,7 +29,7 @@ class User(Base):
 
     user_group_connectors = relationship("UserGroupConnector", back_populates="user")
     faces_from_user = relationship("FacesFromUser", back_populates="user")
-    user_notifications = relationship("UserNotifications", back_populates="user")
+    user_notifications = relationship("UserNotifications", back_populates="user", uselist=False)
 
     @classmethod
     async def get_user_by_email_or_username(cls, session: AsyncSession, email: str|None=None, username: str|None=None):
@@ -63,14 +63,18 @@ class User(Base):
                 self.token = new_token
                 break
 
-    async def get_allowed_notification_types(self):
+    def get_allowed_notification_types(self):
         allowed_notifications = set()
+        if self.user_notifications is None:
+            return allowed_notifications
+    
         if self.user_notifications.notification_new_video:
             allowed_notifications.add(VIDEO_TYPE_UNKNOWN)
         if self.user_notifications.notification_intruder:
             allowed_notifications.add(VIDEO_TYPE_INTRUDER)
         if self.user_notifications.notification_friend:
             allowed_notifications.add(VIDEO_TYPE_FRIEND)
+        
         return allowed_notifications
 
 

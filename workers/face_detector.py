@@ -9,6 +9,7 @@ from db.connector_sync import SessionSync
 from services.notifier import NotifierService 
 from constants.notifications import *
 
+
 class Analyzer:
     def worker_job(self, batch_size: int = 5, sleep_time: int = 5):
         while True:
@@ -206,7 +207,8 @@ class Analyzer:
             
             for user_group in group.user_group_connectors:
                 user = user_group.user
-                if user.notification_token and message_type in user.get_allowed_notification_types:
+                allowed_notifactions = user.get_allowed_notification_types()
+                if user.notification_token and message_type in allowed_notifactions:
                     notification_tokens.add(user.notification_token)
 
         if len(notification_tokens):
