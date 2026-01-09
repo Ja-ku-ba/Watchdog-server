@@ -35,7 +35,7 @@ class Video(Base):
 
     async def generate_hash(self, session: AsyncSession):
         while True:
-            new_hash = str(uuid4())
+            new_hash = str(uuid4())[-32:]
             # Async query
             result = await session.execute(
                 select(Video).filter(Video.hash == new_hash)

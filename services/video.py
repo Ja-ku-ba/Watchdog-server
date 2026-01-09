@@ -33,6 +33,7 @@ class VideoService:
             select(Video)
             .filter(Video.camera_id.in_([camera.id for camera in cameras]))
             .options(selectinload(Video.camera))
+            .order_by(Video.recorded_at.desc())
         )
 
         result = await self._session.execute(stmt_videos)

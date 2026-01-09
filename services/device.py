@@ -182,7 +182,8 @@ class DeviceService:
             return None
 
     async def _create_camera_group_connector(self, camera_id: int, group_id: int) -> None:
-        stmt = insert(UserGroupConnector).values(
+        print(camera_id, group_id)
+        stmt = insert(CameraGroupConnector).values(
             camera_id=camera_id,
             group_id=group_id
         )

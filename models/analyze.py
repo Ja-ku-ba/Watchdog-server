@@ -41,7 +41,7 @@ class FacesFromUser(Base):
 
     async def generate_hash(self, session: AsyncSession):
         while True:
-            new_hash = str(uuid4())
+            new_hash = str(uuid4())[-32:]
             result = await session.execute(
                 select(FacesFromUser).filter(FacesFromUser.hash == new_hash)
             )
