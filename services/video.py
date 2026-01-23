@@ -7,8 +7,9 @@ from sqlalchemy.orm import selectinload, joinedload
 
 from models.user import User
 from models.device import Camera, CameraGroupConnector
-from models.user import User, Group, UserGroupConnector
+from models.user import User, Group, UserGroupConnector, UserNotifications
 from models.video import Video
+from services.notifier import NotifierService
 
 
 class VideoService:
@@ -83,3 +84,25 @@ class VideoService:
         except Exception as e:
             print(e)
             return False
+
+    async def trigger_notification_new_video(self, new_video):
+        stmt_cameras = (
+            select(User, UserNotifications)
+            .join(UserGroupConnector, User.id == UserGroupConnector.user_id)
+            .join(Group, UserGroupConnector.group_id == Group.id)
+            .join(CameraGroupConnector, Group.id == CameraGroupConnector.group_id)
+            .join(Camera, CameraGroupConnector.camera_id == Camera.id)
+            .outerjoin(UserNotifications, UserNotifications.user_id == User.id)
+            .where(Camera.id == self._camera.id)
+            .distinct()
+        )
+        
+        result = await self._session.execute(stmt_cameras)
+        users_with_notifications = result.all()
+        
+        for user, user_not_stngs in users_with_notifications:
+            user_notification_token = user.notification_token
+            if user_notification_token:
+                if user_not_stngs and user_not_stngs.notification_new_video:
+                    NotifierService().send_notification(user_notification_token, "Powiadomienie o detekcji", "Nowe nagranie")
+                    await self._send_notification(user, new_video)

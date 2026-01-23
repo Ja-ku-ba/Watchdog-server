@@ -5,10 +5,9 @@ from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.user import User
-from schemas.user import BaseUniqueUser
+from schemas.device import RegisterDevice
 from models.device import Camera, CameraGroupConnector
 from models.user import User, Group, UserGroupConnector
-from models.video import Video
 
 
 class DeviceService:
@@ -16,41 +15,28 @@ class DeviceService:
         self._session = session
         self._camera = current_camera
 
-    async def register_device(self, request_user: BaseUniqueUser) -> bool:
+    async def register_device(self, request_device: RegisterDevice) -> bool:
         try:
-            print('-------------------------------')
             user = await User.get_user_by_email_or_username(
                 session=self._session, 
-                email=request_user.email
+                email=request_device.email
             )
-            print(user)
             if not user:
                 return False
             
             related_users = await self._get_related_users(user.id)
-            print(related_users)
             existing_group = await self._get_camera_group(self._camera.id)
-            print(existing_group)
             if existing_group:
                 target_group = existing_group
             else:
-                group_name = f"Kamera: {datetime.datetime.now().strftime('%d.%m.%Y')}"
-                print(group_name)
-                # if not group_name:
-                    # group_name = f"Kamera {self._camera.device_name}"
-                target_group = await self._create_group(group_name)
-                print(target_group)
+                target_group = await self._create_group(request_device.device_name)
                 if not target_group:
                     return False
-                print(target_group)
                 await self._create_camera_group_connector(self._camera.id, target_group.id)
-            print(111)
             await self._add_users_to_group_if_not_exists(target_group.id, related_users)
-            print(222)
             await self._propagate_all_cameras_between_users(related_users)
-            print(333)
+            await self._update_group_cameras_names(target_group, request_device.device_name)
             await self._session.commit()
-            print(444)
             return True
             
         except Exception as e:
@@ -144,7 +130,24 @@ class DeviceService:
         stmt = insert(UserGroupConnector).values(connectors_to_create)
         await self._session.execute(stmt)
         
+    async def _update_group_cameras_names(self, group: Group, device_name: str) -> None:
+        stmt = select(CameraGroupConnector).where(
+            CameraGroupConnector.group_id == group.id
+        )
+        result = await self._session.execute(stmt)
+        connectors = result.scalars().all()
+        
+        for connector in connectors:
+            camera_stmt = select(Camera).where(Camera.id == connector.camera_id)
+            camera_result = await self._session.execute(camera_stmt)
+            camera = camera_result.scalar_one_or_none()
             
+            if camera:
+                camera.name = f'Kamera {device_name}'
+                if not camera.activated_at:
+                    camera.activated_at = datetime.datetime.now()
+        group.name = device_name
+
     async def _get_related_users(self, user_id: int) -> Set[int]:
         user_groups_stmt = (
             select(UserGroupConnector.group_id)

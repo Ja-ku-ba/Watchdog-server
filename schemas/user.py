@@ -1,16 +1,13 @@
 from pydantic import BaseModel, EmailStr, validator
 
 
-class BaseUniqueUser(BaseModel):
+class BaseUser(BaseModel):
+    username: str
     email: EmailStr
 
     @validator('email', pre=True)
     def clean_email(cls, v):
         return str(v).strip().lower()
-
-
-class BaseUser(BaseUniqueUser):
-    username: str
 
     
     @validator('username', pre=True)  

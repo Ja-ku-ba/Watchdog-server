@@ -7,7 +7,7 @@ from db.connector import get_session
 from services.device import DeviceService
 from utils.auth import AuthBackend
 from models.device import Camera
-from schemas.user import BaseUniqueUser
+from schemas.device import RegisterDevice
 
 
 router = APIRouter(
@@ -17,8 +17,8 @@ router = APIRouter(
 
 
 @router.post("/register-device/")
-async def register_device(request_user: BaseUniqueUser, session: AsyncSession = Depends(get_session), current_camera: Camera = Depends(AuthBackend().get_current_device)):
-    status = await DeviceService(session, current_camera).register_device(request_user)
+async def register_device(request_device: RegisterDevice, session: AsyncSession = Depends(get_session), current_camera: Camera = Depends(AuthBackend().get_current_device)):
+    status = await DeviceService(session, current_camera).register_device(request_device)
     if not status:
         raise HTTPException(status_code=400)
     return Response(status_code=202)
