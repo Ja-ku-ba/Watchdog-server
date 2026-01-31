@@ -143,7 +143,7 @@ class DeviceService:
             camera = camera_result.scalar_one_or_none()
             
             if camera:
-                camera.name = f'Kamera {device_name}'
+                camera.device_name = f'Kamera {device_name}'
                 if not camera.activated_at:
                     camera.activated_at = datetime.datetime.now()
         group.name = device_name
@@ -185,7 +185,6 @@ class DeviceService:
             return None
 
     async def _create_camera_group_connector(self, camera_id: int, group_id: int) -> None:
-        print(camera_id, group_id)
         stmt = insert(CameraGroupConnector).values(
             camera_id=camera_id,
             group_id=group_id
