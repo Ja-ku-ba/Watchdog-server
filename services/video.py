@@ -80,12 +80,13 @@ class VideoService:
             
             self._session.add(new_video)
             await self._session.commit()
+            await self.trigger_notification_new_video()
             return True
         except Exception as e:
             print(e)
             return False
 
-    async def trigger_notification_new_video(self, new_video):
+    async def trigger_notification_new_video(self):
         stmt_cameras = (
             select(User, UserNotifications)
             .join(UserGroupConnector, User.id == UserGroupConnector.user_id)
@@ -105,4 +106,3 @@ class VideoService:
             if user_notification_token:
                 if user_not_stngs and user_not_stngs.notification_new_video:
                     NotifierService().send_notification(user_notification_token, "Powiadomienie o detekcji", "Nowe nagranie")
-                    await self._send_notification(user, new_video)
