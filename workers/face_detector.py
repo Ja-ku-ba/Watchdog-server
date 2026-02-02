@@ -213,6 +213,6 @@ class Analyzer:
 
         if len(notification_tokens):
             message = get_message_by_type(message_type)
-            NotifierService().send_multicast(list(notification_tokens), "Powiadomienie o detekcji", message)
+            NotifierService().send_multicast(notification_tokens, "Powiadomienie o detekcji", message)
 
 Analyzer().worker_job(batch_size=1, sleep_time=10)

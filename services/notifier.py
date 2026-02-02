@@ -20,12 +20,12 @@ class NotifierService:
 
     def send_multicast(self, tokens: List[str], title: str, body: str):
         try:
-            messages = [self._get_mesage_body(title, body, token) for token in tokens]
+            # messages = [self._get_mesage_body(title, body, token) for token in tokens]
 
-            response = messaging.send_each(messages)
-            print(f"Wysłano {response.success_count}/{len(tokens)} powiadomień")
-            if response.failure_count > 0:
-                print(f"Niepowodzenia: {response.failure_count}")
+            # response = messaging.send_each(messages)
+            for token in tokens:
+                # message = self._get_mesage_body(title, body, token)
+                response = self.send_notification(token, title, body)
             return response
         except Exception as e:
             print(str(e))
