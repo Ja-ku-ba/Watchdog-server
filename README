@@ -1,0 +1,9 @@
+# Watchdog
+## Serwer, w systemie do zarządzania monitoringem z detekcją twarzy, oparte o urządzenie monitorujące na RaspbberyPi 5
+
+Aplikacja składa się z 3 modułów
+- https://github.com/Ja-ku-ba/Watchdog-server
+- https://github.com/Ja-ku-ba/Watchdog-mobile-app
+- https://github.com/Ja-ku-ba/Watchdog-Raspberrypi
+
+Przed uruchomieniem upewnij się, że masz zainstalowane:
