@@ -149,3 +149,60 @@ cd /etc/systemd/system
 nano watchdog-api.service
 ```
 Do tego pliku przkopiuj zawartość server_config/watchdog-api.service, dostosowując swojego użytkownika
+
+
+Skonfiguruj nginx
+```bash
+sudo apt install nginx
+cd /etc/nginx/sites-available/
+nano watchdog-api
+```
+
+Minimalan konfiguracja serwera
+```bash
+server {
+    listen 80;
+    listen [::]:80;
+    server_name twoja-domena.pl www.twoja-domena.pl;
+
+    location / {
+        proxy_pass http://localhost:8000;  # lub inny port na jakim uruchomisz serwer
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+
+    location ~ /\. {
+        deny all;
+        return 404;
+    }
+
+    location ~* \.(env|git|svn|htaccess)$ {
+        deny all;
+        return 404;
+    }
+}
+```
+
+Utwórz symlink
+```bash
+sudo ln -s /etc/nginx/sites-available/watchdog-api /etc/nginx/sites-enabled/
+```
+
+Przeładuj nginx
+```bash
+sudo systemctl reload nginx
+```
+
+Uruchom certbota
+```bash
+sudo certbot --nginx -d twoja-domena.pl -d www.twoja-domena.pl
+```
+
+Uruchom od nowa serwer
+```bash
+sudo reboot
+```
